@@ -64,10 +64,10 @@ def add_sentiment_values_to_file():
     with sentiment labels for model training.
     
     Input: training_testing_data.csv
-    Output: output/predicted_data.csv
+    Output: training_testing_data.csv (overwrites original with sentiment labels)
     """
     # Load the cleaned source dataset
-    file = '../../src/sample_data/training_testing_data.csv'
+    file = '../sample_data/training_testing_data.csv'
     df = pd.read_csv(file)
 
     # Extract star ratings for sentiment classification
@@ -75,12 +75,12 @@ def add_sentiment_values_to_file():
     print(star_ratings)
 
     # Apply binary sentiment classification (positive/negative only)
-    df['sentiment'] = df['stars'].apply(lambda x: sentiments_from_stars(x, 'binary'))
+    df['sentiment'] = df['stars'].apply(lambda x: sentiments_from_stars(x, 'three_class'))
 
     print(df['sentiment'])
     
-    # Save the labeled dataset for training
-    df.to_csv('../../output/predicted_data.csv', index=False)
+    # Save the labeled dataset back to the original file
+    df.to_csv('../sample_data/training_testing_data.csv', index=False)
 
 # Model Training and Evaluation
 
@@ -96,7 +96,7 @@ def main():
     """
     # Step 1: Data Loading
     # Load the sentiment-labeled dataset created by preprocessing
-    file = '../../output/predicted_data.csv'
+    file = '../sample_data/training_testing_data.csv'
     df = pd.read_csv(file)
     
     # Filter out records with missing sentiment labels (e.g., 3-star reviews in binary classification)
@@ -152,6 +152,15 @@ def main():
     # Calculate performance metrics
     accuracy = accuracy_score(sent_predict, sent_test)
     cm = confusion_matrix(sent_test, sent_predict)
+    
+    # Save predictions to CSV with original text and actual sentiment
+    predictions_df = pd.DataFrame({
+        'text': content_test.values,
+        'actual_sentiment': sent_test.values,
+        'predicted_sentiment': sent_predict
+    })
+    predictions_df.to_csv('../../output/predicted_data.csv', index=False)
+    print(f"\nPredictions saved to output/predicted_data.csv")
 
     # Step 6: Results Logging
     # Export comprehensive training report to log file
@@ -224,7 +233,13 @@ if __name__ == "__main__":
     import os
     
     # Verify or create sentiment-labeled dataset
-    if not os.path.exists('../../output/predicted_data.csv'):
+    if not os.path.exists('../sample_data/training_testing_data.csv'):
+        print("Error: training_testing_data.csv not found!")
+        sys.exit(1)
+    
+    # Check if sentiment column exists, if not, add it
+    test_df = pd.read_csv('../sample_data/training_testing_data.csv')
+    if 'sentiment' not in test_df.columns:
         print("Preprocessing: Generating sentiment-labeled dataset..")
         add_sentiment_values_to_file()
         print("Dataset creation complete..\n")
