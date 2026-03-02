@@ -159,15 +159,15 @@ def main():
         'actual_sentiment': sent_test.values,
         'predicted_sentiment': sent_predict
     })
-    predictions_df.to_csv('../../output/predicted_data.csv', index=False)
-    print(f"\nPredictions saved to output/predicted_data.csv")
+    predictions_df.to_csv('../../output/predicted_data_multi.csv', index=False)
+    print(f"\nPredictions saved to output/predicted_data_multi.csv")
 
     # Step 6: Results Logging
     # Export comprehensive training report to log file
     # Save original stdout to restore it later
     original_stdout = sys.stdout
     
-    with open('../../output/training.log', 'w') as log_file:
+    with open('../../output/training_multi.log', 'w') as log_file:
         sys.stdout = log_file
         
         # Dataset Summary
